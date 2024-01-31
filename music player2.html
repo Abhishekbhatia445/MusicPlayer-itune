@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Music App</title>
+    <style>
+        body {
+    background-color: black;
+}
+nav {
+    margin: auto;
+    max-width: 500px;
+    padding: 337px;
+}
+input#searchTerm {
+    padding: 20px;
+}
+button#searchTermBtn {
+    padding: 20px;
+}
+
+    </style>
+</head>
+<body>
+    <nav>
+        <input type="text" id="searchTerm">
+        <button id="searchTermBtn">Search</button>
+    </nav>
+
+    <main id="songs">
+        <!-- This is where search results will be displayed -->
+    </main>
+
+    <script>
+        let term = '';
+        const updateTerm = () => {
+            term = document.getElementById('searchTerm').value;
+            // Check if the term exists
+            if (!term || term === '') {
+                alert('Please enter a search term');
+            } else {
+                const URL = `https://itunes.apple.com/search?term=${term}`;
+                const songContainer = document.getElementById('songs');
+                while (songContainer.firstChild) {
+                    songContainer.removeChild(songContainer.firstChild);
+                }
+                fetch(URL)
+                    .then((response) => response.json())
+                    .then((data) => {
+                        const artists = data.results;
+                        artists.map((result) => {
+                            const article = document.createElement('article');
+                            const artist = document.createElement('p');
+                            const song = document.createElement('h4');
+                            const img = document.createElement('img');
+                            const audio = document.createElement('audio');
+                            const audioSource = document.createElement('source');
+
+                            artist.innerHTML = result.artistName;
+                            song.innerHTML = result.trackName;
+                            img.src = result.artworkUrl100;
+                            audioSource.src = result.previewUrl;
+                            audio.controls = true;
+
+                            audio.appendChild(audioSource); // Add the source to the audio element
+
+                            // Add the play event listener to each audio element
+                            audio.addEventListener('play', (event) => {
+                                const audioElements = document.getElementsByTagName('audio');
+                                for (let i = 0; i < audioElements.length; i++) {
+                                    if (audioElements[i] !== event.target) {
+                                        audioElements[i].pause();
+                                    }
+                                }
+                            });
+
+                            article.appendChild(img);
+                            article.appendChild(artist);
+                            article.appendChild(song);
+                            article.appendChild(audio);
+
+                            songContainer.appendChild(article);
+                        });
+                    })
+                    .catch((error) => console.log('Request failed:', error));
+            }
+        };
+
+        const searchBtn = document.getElementById('searchTermBtn');
+        searchBtn.addEventListener('click', updateTerm);
+    </script>
+</body>
+</html>
